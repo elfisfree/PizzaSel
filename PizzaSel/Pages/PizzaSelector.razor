@@ -1,0 +1,111 @@
+﻿@page "/pizza-order"
+@using System.Collections.Generic
+@using System.Linq
+
+<h1>Pizza Order</h1>
+
+<div class="row">
+    @foreach (var pizza in Pizzas)
+    {
+        <div class="col-md-4">
+            <div class="card">
+                <a href="@pizza.ImageUrl">
+                    <img src="@pizza.ImageUrl" class="card-img" alt="@pizza.Name">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">@pizza.Name</h5>
+                    <p class="card-text">Price: ₽@pizza.Price</p>
+                    <p class="card-text">Ingredients: @string.Join(", ", pizza.Ingredients)</p>
+                    <p class="card-text">Weight: @pizza.Weight</p>
+                    <button class="btn btn-primary" @onclick="() => AddToCart(pizza)">Добавить в корзину</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Корзина:</h3>
+        <ul class="list-group">
+            @foreach (var orderItem in Cart)
+            {
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>@orderItem.Pizza.Name - Количество: @orderItem.Quantity</span>
+                        <button class="btn btn-danger" @onclick="() => RemovePizzaFromCart(orderItem)">Убрать
+                            <span class="oi oi-delete" />
+                        </button>
+                    </div>
+                </li>
+            }
+            <li class="list-group-item">Сумма заказа: ₽@TotalPrice</li>
+        </ul>
+    </div>
+</div>
+
+<style type="text/css">
+
+.background-grad    
+    {
+        background-color: #00DBDE;
+        background-image: linear-gradient(90deg, #00DBDE 0%, #FC00FF 100%);
+    }
+
+</style>
+
+@code {
+    private List<Pizza> Pizzas = new List<Pizza>
+    {
+        new Pizza { Name = "Маргарита", Price = 369.99m, Ingredients = new List<string> { "Помидоры", "Моцарелла" }, Weight = 250, ImageUrl = "https://n1s1.hsmedia.ru/59/36/c9/5936c9e68910131291645f5a16f64ff5/728x546_1_1433a5b929e0c874a97a0294863f7d17@1706x1280_0xQG2bzfJA_6913784370140981657.jpg" },
+        new Pizza { Name = "Пепперони", Price = 419.99m, Ingredients = new List<string> { "Пепперони", "Томатный соус", "Моцарелла" }, Weight = 300, ImageUrl = "https://nicecook.ru/wp-content/uploads/2020/05/domashnyaya-picca-pepperoni-gotovaya-picca.jpg" },
+        new Pizza { Name = "Мясная", Price = 759.99m, Ingredients = new List<string> { "Цыпленок", "Ветчниа", "Пепперони", "Чоризо", "Моцарелла" }, Weight = 590, ImageUrl = "https://www.aiva-cafe.ru/wp-content/uploads/2018/08/8c59f9727e52bac9e099d4367d47b2f8.jpg" },
+        new Pizza { Name = "Сырная", Price = 509.99m, Ingredients = new List<string> { "Моцарелла", "Чеддер", "Пармезан" }, Weight = 470, ImageUrl = "https://cdn.vkuso.ru/uploads/picca-s-syrom-po-domashnemu.jpg" },
+        new Pizza { Name = "Ветчина и сыр", Price = 369.99m, Ingredients = new List<string> { "Ветчина", "Альфредо", "Моцарелла" }, Weight = 480, ImageUrl = "https://img.povar.ru/mobile/76/ce/e5/59/picca_s_vetchinoi_i_sirom-90395.jpg" },
+        new Pizza { Name = "Песто", Price = 769.99m, Ingredients = new List<string> { "Цыпленок", "Соус песто", "Брынза", "Моцарелла", "Помидоры" }, Weight = 610, ImageUrl = "https://www.patee.ru/r/x6/01/8e/8a/960m.jpg" },
+    };
+
+    private List<OrderItem> Cart = new List<OrderItem>();
+
+    private decimal TotalPrice => Cart.Sum(item => item.Pizza.Price * item.Quantity);
+
+    private void AddToCart(Pizza pizza)
+    {
+        var existingItem = Cart.FirstOrDefault(item => item.Pizza.Name == pizza.Name);
+        if (existingItem != null)
+        {
+            existingItem.Quantity++;
+        }
+        else
+        {
+            Cart.Add(new OrderItem { Pizza = pizza, Quantity = 1 });
+        }
+    }
+
+    public class Pizza
+    {
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public List<string> Ingredients { get; set; }
+        public double Weight { get; set; }
+        public string ImageUrl { get; set; }
+    }
+
+    public class OrderItem
+    {
+        public Pizza Pizza { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    private void RemovePizzaFromCart(OrderItem orderItem)
+    {
+        if (orderItem.Quantity > 1)
+        {
+            orderItem.Quantity--;
+        }
+        else
+        {
+            Cart.Remove(orderItem);
+        }
+    }
+
+}
